@@ -9,6 +9,7 @@ import authPlugin from './middleware/auth.js';
 import { authRoutes } from './routes/auth.js';
 import { clientRoutes } from './routes/clients.js';
 import { brandGuideRoutes } from './routes/brand-guides.js';
+import { pipelineRoutes } from './routes/pipelines.js';
 
 const PORT = parseInt(process.env.PORT ?? '3000', 10);
 const IS_DEV = process.env.NODE_ENV !== 'production';
@@ -69,6 +70,7 @@ await fastify.register(authPlugin);
 await fastify.register(authRoutes);
 await fastify.register(clientRoutes);
 await fastify.register(brandGuideRoutes);
+await fastify.register(pipelineRoutes);
 
 // Health check (no auth required)
 fastify.get('/health', async () => ({

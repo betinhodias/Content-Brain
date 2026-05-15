@@ -2,9 +2,17 @@
 // OpenAI embeddings for Brand Guide RAG
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let _openai: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!_openai) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('Missing OPENAI_API_KEY environment variable');
+    }
+    _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  }
+  return _openai;
+}
 
 const EMBEDDING_MODEL = process.env.EMBEDDINGS_MODEL ?? 'text-embedding-3-small';
 const EMBEDDING_DIMENSIONS = 1536;
@@ -13,12 +21,11 @@ const EMBEDDING_DIMENSIONS = 1536;
  * Generate embedding vector for a single text string.
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
-  const response = await openai.embeddings.create({
+  const response = await getOpenAI().embeddings.create({
     model: EMBEDDING_MODEL,
-    input: text.replace(/\n/g, ' '), // OpenAI recommends replacing newlines
+    input: text.replace(/\n/g, ' '),
     dimensions: EMBEDDING_DIMENSIONS,
   });
-
   return response.data[0].embedding;
 }
 
@@ -26,13 +33,11 @@ export async function generateEmbedding(text: string): Promise<number[]> {
  * Generate embeddings for multiple texts in a single API call (more efficient).
  */
 export async function generateEmbeddingsBatch(texts: string[]): Promise<number[][]> {
-  const response = await openai.embeddings.create({
+  const response = await getOpenAI().embeddings.create({
     model: EMBEDDING_MODEL,
     input: texts.map(t => t.replace(/\n/g, ' ')),
     dimensions: EMBEDDING_DIMENSIONS,
   });
-
-  // Sort by index to maintain order
   return response.data
     .sort((a, b) => a.index - b.index)
     .map(item => item.embedding);
