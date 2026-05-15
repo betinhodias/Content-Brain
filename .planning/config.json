@@ -1,12 +1,31 @@
 {
   "mode": "yolo",
-  "parallelization": true,
-  "depth": "quick",
+  "granularity": "standard",
+  "parallelization": {
+    "enabled": true
+  },
+  "commit_docs": true,
+  "model_profile": "balanced",
   "workflow": {
     "research": true,
-    "plan_checker": true,
+    "plan_check": true,
     "verifier": true,
-    "auto_advance": true,
-    "skip_discuss": false
+    "nyquist_validation": true,
+    "ui_phase": true,
+    "drift_action": "warn"
+  },
+  "ship": {
+    "pr_body_sections": [
+      {
+        "heading": "User Stories & Acceptance Criteria",
+        "enabled": true,
+        "source": "REQUIREMENTS.md ## User Stories || REQUIREMENTS.md ## Acceptance Criteria"
+      },
+      {
+        "heading": "Risks & Dependencies",
+        "enabled": true,
+        "source": "PLAN.md ## Risks || PLAN.md ## Dependencies"
+      }
+    ]
   }
 }
