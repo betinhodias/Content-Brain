@@ -12,8 +12,8 @@ export async function clientRoutes(fastify: FastifyInstance) {
   // All client routes require authentication
   fastify.addHook('preHandler', fastify.authenticate);
 
-  // GET /clients — list all clients for the operator's agency
-  fastify.get('/clients', async (request, reply) => {
+  // GET / — list all clients for the agency
+  fastify.get('/', async (request, reply) => {
     const { agencyId } = request.auth;
 
     const { data, error } = await supabaseAdmin
@@ -30,8 +30,8 @@ export async function clientRoutes(fastify: FastifyInstance) {
     return reply.code(200).send({ success: true, data });
   });
 
-  // GET /clients/:id — get single client
-  fastify.get('/clients/:id', async (request, reply) => {
+  // GET /:id — get client details
+  fastify.get('/:id', async (request, reply) => {
     const { id } = request.params as { id: string };
     const { agencyId } = request.auth;
 
@@ -49,8 +49,8 @@ export async function clientRoutes(fastify: FastifyInstance) {
     return reply.code(200).send({ success: true, data });
   });
 
-  // POST /clients — create new client (tenant)
-  fastify.post('/clients', async (request, reply) => {
+  // POST / — create new client
+  fastify.post('/', async (request, reply) => {
     const parseResult = CreateClientSchema.safeParse(request.body);
 
     if (!parseResult.success) {

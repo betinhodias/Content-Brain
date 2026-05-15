@@ -10,6 +10,7 @@ import { authRoutes } from './routes/auth.js';
 import { clientRoutes } from './routes/clients.js';
 import { brandGuideRoutes } from './routes/brand-guides.js';
 import { pipelineRoutes } from './routes/pipelines.js';
+import { statsRoutes } from './routes/stats.js';
 
 const PORT = parseInt(process.env.PORT ?? '3000', 10);
 const IS_DEV = process.env.NODE_ENV !== 'production';
@@ -67,10 +68,11 @@ await fastify.register(authPlugin);
 // ========================
 // Routes
 // ========================
-await fastify.register(authRoutes);
-await fastify.register(clientRoutes);
-await fastify.register(brandGuideRoutes);
-await fastify.register(pipelineRoutes);
+await fastify.register(authRoutes, { prefix: '/auth' });
+await fastify.register(clientRoutes, { prefix: '/clients' });
+await fastify.register(brandGuideRoutes, { prefix: '/brand-guides' });
+await fastify.register(pipelineRoutes, { prefix: '/pipelines' });
+await fastify.register(statsRoutes, { prefix: '/stats' });
 
 // Health check (no auth required)
 fastify.get('/health', async () => ({

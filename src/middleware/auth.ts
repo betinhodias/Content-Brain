@@ -22,14 +22,19 @@ async function resolveAgencyContext(userId: string): Promise<AuthContext | null>
     .from('agency_users')
     .select('agency_id, role')
     .eq('user_id', userId)
-    .single();
+    .limit(1);
 
-  if (error || !data) return null;
+  if (error || !data || data.length === 0) {
+    console.log(`[Auth] No agency link found for user ${userId}:`, error?.message);
+    return null;
+  }
+  const agencyData = data[0];
+  console.log(`[Auth] Agency context resolved for user ${userId}:`, agencyData.agency_id);
 
   return {
     userId,
-    agencyId: data.agency_id,
-    role: data.role as AuthContext['role'],
+    agencyId: agencyData.agency_id,
+    role: agencyData.role as AuthContext['role'],
   };
 }
 
@@ -54,6 +59,7 @@ async function authenticateHandler(request: FastifyRequest, reply: FastifyReply)
   const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
 
   if (error || !user) {
+    console.error('[Auth Error] Supabase validation failed:', error?.message || 'No user found');
     return reply.code(401).send({
       success: false,
       error: 'Invalid or expired token',
@@ -65,6 +71,7 @@ async function authenticateHandler(request: FastifyRequest, reply: FastifyReply)
   const context = await resolveAgencyContext(user.id);
 
   if (!context) {
+    console.error(`[Auth Error] User ${user.id} (${user.email}) has no agency association in agency_users table`);
     return reply.code(403).send({
       success: false,
       error: 'User is not associated with any active agency',

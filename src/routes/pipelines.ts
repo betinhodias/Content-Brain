@@ -9,8 +9,8 @@ export async function pipelineRoutes(fastify: FastifyInstance) {
 
   fastify.addHook('preHandler', fastify.authenticate);
 
-  // POST /pipelines/copy — create pipeline and run Copy Agent
-  fastify.post('/pipelines/copy', async (request, reply) => {
+  // POST /copy — create pipeline and run Copy Agent
+  fastify.post('/copy', async (request, reply) => {
     const parseResult = CreatePipelineSchema.safeParse(request.body);
 
     if (!parseResult.success) {
@@ -81,8 +81,8 @@ export async function pipelineRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // GET /pipelines/:id — poll pipeline status and retrieve results
-  fastify.get('/pipelines/:id', async (request, reply) => {
+  // GET /:id — poll pipeline status and retrieve results
+  fastify.get('/:id', async (request, reply) => {
     const { id } = request.params as { id: string };
     const { agencyId } = request.auth;
 
@@ -103,8 +103,8 @@ export async function pipelineRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // GET /pipelines — list pipelines for a client
-  fastify.get('/pipelines', async (request, reply) => {
+  // GET / — list pipelines for a client
+  fastify.get('/', async (request, reply) => {
     const query = request.query as { clientId?: string; status?: string; limit?: string };
     const { agencyId } = request.auth;
 
