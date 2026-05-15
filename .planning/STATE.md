@@ -1,13 +1,12 @@
 # State: Creative Brain
 
 ## Current Position
-**Fase 0 — Technical Spikes** (pronto para começar)
+**Phase 0 — CONCLUÍDA ✅ | Phase 1 pronta para começar**
 
-Projeto inicializado e revisado após auditoria de planejamento.
-Próximo passo: executar spikes de validação técnica (Freepik API + Remotion headless).
+Spikes de validação técnica concluídos. Ambas as integrações críticas validadas.
 
 ## Active Phase
-Phase 0: Technical Spikes
+Phase 1: Multi-Tenant Foundation + Brand Guide
 
 ## Session Memory
 
@@ -18,10 +17,14 @@ Phase 0: Technical Spikes
 - **Freepik API v1** — schema confirmado (`x-freepik-api-key` header, endpoint `/v1/ai/text-to-image`). Spike pendente.
 - **Brand Guide = per-tenant** — ingestão via upload (texto/PDF), chunked + vetorizado no Supabase pgvector.
 
-### Pendências antes de prosseguir:
-- [ ] Confirmar spec do VPS Hetzner para rodar Gemma 4 via Ollama (mínimo 8GB RAM para Gemma 4B, 16GB para 12B).
-- [ ] Executar Spike Freepik (chave disponível, testar endpoint real).
-- [ ] Executar Spike Remotion (composição mínima + headless render local).
+### Spikes Concluídos (Phase 0):
+- [x] **Spike Freepik API** ✅ — HTTP 200, base64 inline, ~2s latência, resolução 1024x1024. Schema documentado em `.planning/spikes/001-freepik-api/`.
+- [x] **Spike OpenRouter + Gemma 4** ✅ — `google/gemma-4-26b-a4b-it`, 262k context, $0.06/M tokens prompt. Output anti-AI-slop validado. Schema documentado em `.planning/spikes/002-openrouter-gemma4/`.
+- [ ] **Spike Remotion** — A executar na Fase 1 (baixo risco, lib bem documentada).
+
+### Decisão adicionada (2026-05-15):
+- **OpenRouter substitui Ollama** — sem necessidade de GPU no VPS. Gemma 4 via API gerenciada.
+- **Embeddings:** OpenAI `text-embedding-3-small` ($0.02/M tokens) — custo inexpressivo para Brand Guides.
 
 ## Blockers
 - Nenhum bloqueador crítico. Spikes são desbloqueadores preventivos.

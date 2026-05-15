@@ -1,0 +1,41 @@
+# Secrets — NUNCA commitar
+.env
+.env.local
+.env.production
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+.next/
+out/
+build/
+
+# Remotion renders output
+out/
+src/remotion/out/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Supabase local
+.supabase/
+
+# UI Review screenshots (GSD)
+.planning/ui-reviews/
+
+# Temporary spike output
+/tmp/
+*.tmp
