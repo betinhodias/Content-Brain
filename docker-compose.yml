@@ -1,0 +1,26 @@
+version: '3.9'
+
+services:
+  api:
+    build: .
+    container_name: creative-brain-api
+    ports:
+      - "${PORT:-3000}:3000"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+    volumes:
+      # In dev: mount src for hot reload via tsx watch
+      - ./src:/app/src:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  default:
+    name: creative-brain-network
