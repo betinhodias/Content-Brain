@@ -40,7 +40,7 @@ export default function NewPipelinePage() {
     setLoading(true);
     try {
       const response = await api.post('/pipelines/copy', formData);
-      router.push(`/pipelines/${response.data.pipelineId}`);
+      router.push(`/pipelines/${response.data.data.pipelineId}`);
     } catch (err) {
       alert('Erro ao criar pipeline: ' + (err as Error).message);
     } finally {

@@ -36,10 +36,10 @@ export default function PipelineDetailPage() {
     const fetchPipeline = async () => {
       try {
         const response = await api.get(`/pipelines/${id}`);
-        setPipeline(response.data);
+        setPipeline(response.data.data);
         
         // If still running, poll every 3 seconds
-        if (response.data.status === 'running' || response.data.status === 'pending') {
+        if (response.data.data.status === 'running' || response.data.data.status === 'pending') {
           setTimeout(fetchPipeline, 3000);
         }
       } catch (err) {
@@ -95,7 +95,24 @@ export default function PipelineDetailPage() {
 
           <div className="card-actions">
             <button className="btn-secondary glass">Ajustar com IA</button>
-            <button className="btn-primary">Aprovar Copy</button>
+            <button 
+              className="btn-primary"
+              onClick={async () => {
+                try {
+                  await api.post('/pipelines/visual', { pipelineId: id });
+                  await api.post('/pipelines/thumb', { pipelineId: id }); // Trigger cover generation
+                  alert('Aprovado! Iniciando Motor Visual e de Capas (Freepik)...');
+                  // Trigger immediate re-fetch
+                  const response = await api.get(`/pipelines/${id}`);
+                  setPipeline(response.data.data);
+                } catch (err) {
+                  alert('Erro ao disparar próximos agentes: ' + (err as Error).message);
+                }
+              }}
+              disabled={pipeline.status === 'pending' || pipeline.status === 'running' || !pipeline.copy_output}
+            >
+              Aprovar Copy & Gerar Visual 🎨
+            </button>
           </div>
         </div>
 
@@ -115,6 +132,26 @@ export default function PipelineDetailPage() {
                   <span>Gerando Imagem...</span>
                 </div>
               )}
+            </div>
+            <div className="card-actions" style={{ marginTop: '12px', justifyContent: 'flex-end' }}>
+              <button 
+                className="btn-primary"
+                onClick={async () => {
+                  try {
+                    const rawVideoUrl = prompt('Tem um vídeo cru para compor o fundo? (Cole a URL ou deixe em branco para animação 100% gráfica)');
+                    await api.post('/pipelines/motion', { pipelineId: id, rawVideoUrl: rawVideoUrl || undefined });
+                    alert('Motor de Motion iniciado! O Remotion está processando...');
+                    // Trigger immediate re-fetch
+                    const response = await api.get(`/pipelines/${id}`);
+                    setPipeline(response.data.data);
+                  } catch (err) {
+                    alert('Erro ao disparar Motion Agent: ' + (err as Error).message);
+                  }
+                }}
+                disabled={!pipeline.visual_output?.publicUrl && pipeline.status !== 'completed'} // Allow if completed or has visual
+              >
+                Renderizar Vídeo 🎬
+              </button>
             </div>
           </div>
 

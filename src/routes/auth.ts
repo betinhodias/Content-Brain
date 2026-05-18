@@ -1,6 +1,6 @@
 // src/routes/auth.ts
 import { FastifyInstance } from 'fastify';
-import { supabaseAdmin } from '../services/supabase.js';
+import { supabaseAuthClient } from '../services/supabase.js';
 
 export async function authRoutes(fastify: FastifyInstance) {
   fastify.post('/login', async (request, reply) => {
@@ -11,8 +11,8 @@ export async function authRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      // Authenticate directly with Supabase Auth
-      const { data, error } = await supabaseAdmin.auth.signInWithPassword({
+      // Authenticate directly with Supabase Auth using the auth client
+      const { data, error } = await supabaseAuthClient.auth.signInWithPassword({
         email,
         password: pass,
       });

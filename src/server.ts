@@ -33,6 +33,7 @@ for (const key of REQUIRED_ENV) {
 
 // Create Fastify instance
 const fastify = Fastify({
+  trustProxy: true,
   logger: IS_DEV
     ? {
         transport: {

@@ -7,6 +7,7 @@ export async function statsRoutes(fastify: FastifyInstance) {
 
   fastify.get('/', async (request, reply) => {
     const { agencyId } = request.auth;
+    console.log(`[Stats] Fetching metrics for agency: ${agencyId}`);
 
     try {
       // 1. Total Clients

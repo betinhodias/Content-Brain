@@ -146,6 +146,7 @@ export async function runVisualAgent(input: VisualAgentInput): Promise<VisualAge
   await supabaseAdmin
     .from('pipelines')
     .update({
+      status: 'completed', // Stop frontend polling
       visual_output: {
         prompt: visualPromptOutput.positivePrompt,
         negativePrompt: visualPromptOutput.negativePrompt,

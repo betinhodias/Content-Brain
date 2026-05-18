@@ -86,7 +86,7 @@ export async function runThumbAgent(input: ThumbAgentInput): Promise<ThumbAgentR
       pipeline_id: pipelineId,
       client_id: clientId,
       agency_id: agencyId,
-      asset_type: 'thumbnail',
+      asset_type: 'thumb',
       storage_path: savedAsset.storagePath,
       mime_type: 'image/jpeg',
       size_bytes: savedAsset.sizeBytes,
@@ -112,6 +112,7 @@ export async function runThumbAgent(input: ThumbAgentInput): Promise<ThumbAgentR
   await supabaseAdmin
     .from('pipelines')
     .update({
+      status: 'completed', // Stop frontend polling
       thumb_output: {
         prompt: thumbPrompt.positivePrompt,
         assetId: asset.id,

@@ -121,3 +121,95 @@ DROP TRIGGER IF EXISTS update_clients_updated_at ON clients;
 CREATE TRIGGER update_clients_updated_at
   BEFORE UPDATE ON clients
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ============================================================
+-- TABLE: brand_guide_documents
+-- ============================================================
+CREATE TABLE IF NOT EXISTS brand_guide_documents (
+  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  client_id   UUID NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+  agency_id   UUID NOT NULL REFERENCES agencies(id) ON DELETE CASCADE,
+  file_name   TEXT NOT NULL,
+  content     TEXT NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================
+-- TABLE: brand_guide_chunks
+-- ============================================================
+CREATE TABLE IF NOT EXISTS brand_guide_chunks (
+  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  document_id UUID NOT NULL REFERENCES brand_guide_documents(id) ON DELETE CASCADE,
+  client_id   UUID NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+  agency_id   UUID NOT NULL REFERENCES agencies(id) ON DELETE CASCADE,
+  content     TEXT NOT NULL,
+  embedding   vector(1536), -- text-embedding-3-small generates 1536 dims
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================
+-- ROW LEVEL SECURITY (Brand Guides)
+-- ============================================================
+ALTER TABLE brand_guide_documents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE brand_guide_chunks ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "brand_guide_documents_own_agency" ON brand_guide_documents;
+CREATE POLICY "brand_guide_documents_own_agency" ON brand_guide_documents
+  FOR ALL USING (agency_id = get_user_agency_id());
+
+DROP POLICY IF EXISTS "brand_guide_chunks_own_agency" ON brand_guide_chunks;
+CREATE POLICY "brand_guide_chunks_own_agency" ON brand_guide_chunks
+  FOR ALL USING (agency_id = get_user_agency_id());
+
+-- ============================================================
+-- FUNCTION: search_brand_guide
+-- ============================================================
+CREATE OR REPLACE FUNCTION search_brand_guide(
+  query_embedding vector(1536),
+  match_threshold float,
+  match_count int,
+  p_client_id UUID,
+  p_agency_id UUID
+)
+RETURNS TABLE (
+  id UUID,
+  content TEXT,
+  similarity float
+)
+LANGUAGE sql STABLE
+AS $$
+  SELECT
+    brand_guide_chunks.id,
+    brand_guide_chunks.content,
+    1 - (brand_guide_chunks.embedding <=> query_embedding) AS similarity
+  FROM brand_guide_chunks
+  WHERE brand_guide_chunks.client_id = p_client_id
+    AND brand_guide_chunks.agency_id = p_agency_id
+    AND 1 - (brand_guide_chunks.embedding <=> query_embedding) > match_threshold
+  ORDER BY brand_guide_chunks.embedding <=> query_embedding
+  LIMIT match_count;
+$$;
+
+-- ============================================================
+-- TABLE: assets
+-- ============================================================
+CREATE TABLE IF NOT EXISTS assets (
+  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  pipeline_id UUID NOT NULL REFERENCES pipelines(id) ON DELETE CASCADE,
+  client_id   UUID NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+  agency_id   UUID NOT NULL REFERENCES agencies(id) ON DELETE CASCADE,
+  asset_type  TEXT NOT NULL CHECK (asset_type IN ('image', 'video', 'thumb')),
+  storage_path TEXT NOT NULL,
+  mime_type   TEXT,
+  size_bytes  BIGINT,
+  width       INTEGER,
+  height      INTEGER,
+  metadata    JSONB,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE assets ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "assets_own_agency" ON assets;
+CREATE POLICY "assets_own_agency" ON assets
+  FOR ALL USING (agency_id = get_user_agency_id());

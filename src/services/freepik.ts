@@ -135,24 +135,24 @@ export interface SavedAsset {
 }
 
 /**
- * Converts base64 to Buffer and saves to Supabase Storage.
+ * Saves a Buffer to Supabase Storage.
  * Path: /{agencyId}/{clientId}/{pipelineId}/{filename}
  */
-export async function saveImageToStorage(
-  base64: string,
+export async function saveBufferToStorage(
+  buffer: Buffer,
   agencyId: string,
   clientId: string,
   pipelineId: string,
   filename: string,
-  bucket: string = process.env.STORAGE_BUCKET ?? 'creative-brain-assets'
+  bucket: string = process.env.STORAGE_BUCKET ?? 'creative-brain-assets',
+  contentType: string = 'image/jpeg'
 ): Promise<SavedAsset> {
-  const buffer = Buffer.from(base64, 'base64');
   const storagePath = `${agencyId}/${clientId}/${pipelineId}/${filename}`;
 
   const { error } = await supabaseAdmin.storage
     .from(bucket)
     .upload(storagePath, buffer, {
-      contentType: 'image/jpeg',
+      contentType,
       upsert: true,
     });
 
@@ -171,4 +171,20 @@ export async function saveImageToStorage(
     width: 0,  // Will be filled from FreepikResult
     height: 0,
   };
+}
+
+/**
+ * Converts base64 to Buffer and saves to Supabase Storage.
+ */
+export async function saveImageToStorage(
+  base64: string,
+  agencyId: string,
+  clientId: string,
+  pipelineId: string,
+  filename: string,
+  bucket?: string,
+  contentType?: string
+): Promise<SavedAsset> {
+  const buffer = Buffer.from(base64, 'base64');
+  return saveBufferToStorage(buffer, agencyId, clientId, pipelineId, filename, bucket, contentType);
 }

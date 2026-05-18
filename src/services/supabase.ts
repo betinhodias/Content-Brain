@@ -9,9 +9,20 @@ if (!supabaseUrl || !supabaseServiceKey) {
   throw new Error('Missing Supabase environment variables: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY');
 }
 
+console.log(`[Supabase Init] URL: ${supabaseUrl}`);
+console.log(`[Supabase Init] Key starts with: ${supabaseServiceKey.substring(0, 15)}...`);
+
 // Service role client — bypasses RLS for backend operations
 // NEVER expose this client to frontend or untrusted code
 export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+});
+
+// Dedicated client for token verification to prevent tainting the admin client
+export const supabaseAuthClient = createClient(supabaseUrl, process.env.SUPABASE_ANON_KEY!, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,

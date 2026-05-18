@@ -31,7 +31,7 @@ async function seed(userEmail: string, password: string) {
   if (!user) return;
 
   // 2. Create Agency
-  const { data: agency, error: agencyError } = await supabase
+  const { data: agencyData, error: agencyError } = await supabase
     .from('agencies')
     .insert({
       name: 'Calie Marketing',
@@ -40,12 +40,13 @@ async function seed(userEmail: string, password: string) {
     .select()
     .single();
 
+  let agency = agencyData;
   if (agencyError) {
     console.error('Error creating agency:', agencyError.message);
     // Might already exist, try to fetch it
     const { data: existingAgency } = await supabase.from('agencies').select().eq('slug', 'calie-marketing').single();
     if (!existingAgency) return;
-    (agency as any) = existingAgency;
+    agency = existingAgency;
   }
 
   // 3. Link User to Agency

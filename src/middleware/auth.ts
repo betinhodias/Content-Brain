@@ -17,12 +17,16 @@ declare module 'fastify' {
 /**
  * Resolves the agency_id for a given Supabase user_id.
  */
+import { supabaseAdmin, supabaseAuthClient } from '../services/supabase.js';
+
 async function resolveAgencyContext(userId: string): Promise<AuthContext | null> {
   const { data, error } = await supabaseAdmin
     .from('agency_users')
     .select('agency_id, role')
     .eq('user_id', userId)
     .limit(1);
+
+  console.log(`[DEBUG Auth] Query for ${userId} returned:`, JSON.stringify({ data, error }));
 
   if (error || !data || data.length === 0) {
     console.log(`[Auth] No agency link found for user ${userId}:`, error?.message);
@@ -56,7 +60,7 @@ async function authenticateHandler(request: FastifyRequest, reply: FastifyReply)
   const token = authHeader.slice(7);
 
   // Verify token with Supabase
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+  const { data: { user }, error } = await supabaseAuthClient.auth.getUser(token);
 
   if (error || !user) {
     console.error('[Auth Error] Supabase validation failed:', error?.message || 'No user found');
