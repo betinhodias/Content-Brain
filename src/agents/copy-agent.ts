@@ -76,10 +76,11 @@ export async function runCopyAgent(input: CopyAgentInput): Promise<CopyAgentResu
 
       // Search brand guide via Supabase function
       const { data: searchResults } = await supabaseAdmin.rpc('search_brand_guide', {
+        query_embedding: `[${queryEmbedding.join(',')}]`,
+        match_threshold: 0.65,
+        match_count: 5,
         p_client_id: clientId,
-        p_query_embedding: `[${queryEmbedding.join(',')}]`,
-        p_match_count: 5,
-        p_min_similarity: 0.65,
+        p_agency_id: agencyId,
       });
 
       if (searchResults && searchResults.length > 0) {

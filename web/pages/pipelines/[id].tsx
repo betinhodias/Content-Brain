@@ -29,28 +29,37 @@ export default function PipelineDetailPage() {
   const { id } = router.query;
   const [pipeline, setPipeline] = useState<PipelineDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [rawVideoUrl, setRawVideoUrl] = useState('');
 
   useEffect(() => {
     if (!id) return;
+    let active = true;
+    let timerId: any;
 
     const fetchPipeline = async () => {
       try {
         const response = await api.get(`/pipelines/${id}`);
+        if (!active) return;
         setPipeline(response.data.data);
         
         // If still running, poll every 3 seconds
         if (response.data.data.status === 'running' || response.data.data.status === 'pending') {
-          setTimeout(fetchPipeline, 3000);
+          timerId = setTimeout(fetchPipeline, 3000);
         }
       } catch (err) {
         console.error('Error fetching pipeline', err);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
     fetchPipeline();
-  }, [id]);
+
+    return () => {
+      active = false;
+      if (timerId) clearTimeout(timerId);
+    };
+  }, [id, pipeline?.status]);
 
   if (loading && !pipeline) return <div className="p-8">Carregando cérebro...</div>;
   if (!pipeline) return <div className="p-8">Pipeline não encontrado.</div>;
@@ -133,12 +142,35 @@ export default function PipelineDetailPage() {
                 </div>
               )}
             </div>
+
+            <div className="video-input-container" style={{ width: '100%', marginTop: '12px' }}>
+              <label style={{ display: 'block', fontSize: '10px', fontWeight: 600, color: 'var(--foreground-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
+                Vídeo de fundo bruto (URL MP4 - Opcional)
+              </label>
+              <input 
+                type="text" 
+                placeholder="https://link-do-seu-video.mp4" 
+                value={rawVideoUrl}
+                onChange={(e) => setRawVideoUrl(e.target.value)}
+                className="glass-input"
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  background: 'rgba(255,255,255,0.02)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  color: 'white',
+                  outline: 'none',
+                }}
+              />
+            </div>
+
             <div className="card-actions" style={{ marginTop: '12px', justifyContent: 'flex-end' }}>
               <button 
                 className="btn-primary"
                 onClick={async () => {
                   try {
-                    const rawVideoUrl = prompt('Tem um vídeo cru para compor o fundo? (Cole a URL ou deixe em branco para animação 100% gráfica)');
                     await api.post('/pipelines/motion', { pipelineId: id, rawVideoUrl: rawVideoUrl || undefined });
                     alert('Motor de Motion iniciado! O Remotion está processando...');
                     // Trigger immediate re-fetch

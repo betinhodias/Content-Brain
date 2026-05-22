@@ -65,6 +65,7 @@ export async function runVisualAgent(input: VisualAgentInput): Promise<VisualAge
   // =====================
   const assetIds: string[] = [];
   const errors: string[] = [];
+  let firstPublicUrl: string | undefined;
 
   for (let i = 0; i < imageCount; i++) {
     try {
@@ -96,6 +97,10 @@ export async function runVisualAgent(input: VisualAgentInput): Promise<VisualAge
         pipelineId,
         filename
       );
+
+      if (!firstPublicUrl) {
+        firstPublicUrl = savedAsset.publicUrl;
+      }
 
       // =====================
       // 4. Create asset record in database
@@ -148,6 +153,7 @@ export async function runVisualAgent(input: VisualAgentInput): Promise<VisualAge
     .update({
       status: 'completed', // Stop frontend polling
       visual_output: {
+        publicUrl: firstPublicUrl,
         prompt: visualPromptOutput.positivePrompt,
         negativePrompt: visualPromptOutput.negativePrompt,
         assetIds,
