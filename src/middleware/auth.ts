@@ -2,7 +2,7 @@
 // JWT authentication + agency context injection
 import type { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify';
 import fp from 'fastify-plugin';
-import { supabaseAdmin } from '../services/supabase.js';
+import { supabaseAdmin, supabaseAuthClient } from '../services/supabase.js';
 import type { AuthContext } from '../types/index.js';
 
 declare module 'fastify' {
@@ -17,7 +17,7 @@ declare module 'fastify' {
 /**
  * Resolves the agency_id for a given Supabase user_id.
  */
-import { supabaseAdmin, supabaseAuthClient } from '../services/supabase.js';
+
 
 async function resolveAgencyContext(userId: string): Promise<AuthContext | null> {
   const { data, error } = await supabaseAdmin

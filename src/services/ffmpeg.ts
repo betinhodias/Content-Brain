@@ -3,7 +3,6 @@ import { promisify } from 'util';
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
-import { saveImageToStorage } from './freepik.js';
 
 const execAsync = promisify(exec);
 
