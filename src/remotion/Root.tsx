@@ -2,7 +2,7 @@
 // Remotion Root — registers all compositions for the bundler
 import React from 'react';
 import { Composition, registerRoot } from 'remotion';
-import { ReelComposition } from './compositions/ReelComposition.js';
+import { ReelComposition } from './compositions/ReelComposition';
 import type { GSAPManifest } from '../types/index.js';
 
 // Default manifests for preview in Remotion Studio
