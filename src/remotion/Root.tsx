@@ -1,7 +1,7 @@
 // src/remotion/Root.tsx
 // Remotion Root — registers all compositions for the bundler
 import React from 'react';
-import { Composition } from 'remotion';
+import { Composition, registerRoot } from 'remotion';
 import { ReelComposition } from './compositions/ReelComposition.js';
 import type { GSAPManifest } from '../types/index.js';
 
@@ -57,7 +57,9 @@ export const RemotionRoot: React.FC = () => {
           manifest: { ...defaultReelManifest, duration: 12 },
           copyOutput: { hook: 'Preview story hook', cta: 'Tap to see more' },
         }}
-      />
     </>
   );
 };
+
+registerRoot(RemotionRoot);
+
